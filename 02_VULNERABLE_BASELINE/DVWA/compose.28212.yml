@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mariadb:10
+    platform: linux/arm64
+    container_name: db-28212
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "root_28212_lab_only"
+      MARIADB_DATABASE: "db_28212"
+      MARIADB_USER: "jkalema"
+      MARIADB_PASSWORD: "28212_Linux-f26"
+    volumes:
+      - dvwa-28212-data:/var/lib/mysql
+    networks:
+      - dvwa
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  dvwa:
+    image: ghcr.io/digininja/dvwa:latest
+    platform: linux/arm64
+    container_name: dvwa-28212
+    hostname: dvwa-28212
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_SERVER: "db"
+      DB_DATABASE: "db_28212"
+      DB_USER: "jkalema"
+      DB_PASSWORD: "28212_Linux-f26"
+      DEFAULT_SECURITY_LEVEL: "low"
+    ports:
+      - "127.0.0.1:80:80"
+    networks:
+      dvwa:
+        aliases:
+          - task1.28212.linux-f26
+
+volumes:
+  dvwa-28212-data:
+
+networks:
+  dvwa:
+    external: true
+    name: dvwa-28212-net
