@@ -1,0 +1,18 @@
+JAVASCRIPT ATTACKS — REMEDIATION NOTES
+Student ID: 28212
+Environment: Hardened DVWA workspace
+Security level assessed: Impossible
+
+Baseline findings:
+- Low: Client-side MD5/ROT13 validation could be reproduced or bypassed through browser developer tools.
+- Medium: Reversed-phrase and XX-wrapper validation was client-side and could be reproduced.
+- High: Client-side SHA-256 validation could be reproduced using browser developer tools.
+- Impossible: Not implemented by the DVWA module.
+
+Security conclusion:
+Client-side JavaScript is controlled by the browser user and cannot be trusted as a security boundary. Authentication, authorisation, input validation, and sensitive business rules must be enforced independently on the server.
+
+Remediation disposition:
+No Impossible-level implementation or retest is claimed because the upstream DVWA module does not provide that level. The limitation is documented rather than fabricating a test result.
+
+For real applications, server-side validation must remain authoritative even when JavaScript validation is used for user experience.

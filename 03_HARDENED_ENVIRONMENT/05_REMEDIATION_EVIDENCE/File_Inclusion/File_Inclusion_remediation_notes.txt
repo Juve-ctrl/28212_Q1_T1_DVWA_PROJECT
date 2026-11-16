@@ -1,0 +1,44 @@
+FILE INCLUSION - HARDENED REMEDIATION REPORT
+Student ID: 28212
+Application: DVWA
+Environment: Separate hardened Docker environment
+Security Level: Impossible
+Date: 10 November 2026
+
+1. ORIGINAL WEAKNESS
+The original Impossible handler used a filename allowlist but did not
+perform strict type validation or resolve the requested file path.
+
+2. REMEDIATION
+The hardened handler:
+- Accepts only scalar, non-empty filename values.
+- Uses a strict allowlist: include.php, file1.php, file2.php,
+  and file3.php.
+- Rejects directory separators and null bytes.
+- Resolves approved files using realpath().
+- Confirms the resolved file is a direct child of the approved
+  File Inclusion directory.
+- Checks that the file exists, is a regular file, and is readable.
+- Passes the verified absolute path to the parent index.php,
+  which performs the actual include operation.
+
+3. VERIFICATION
+- Legitimate include.php page loaded successfully.
+- Legitimate file1.php loaded successfully.
+- Directory traversal request:
+  ../../../../etc/passwd
+  was rejected with:
+  ERROR: File not permitted.
+- Live PHP syntax check:
+  No syntax errors detected.
+
+4. SCREENSHOT EVIDENCE
+SS_H12_File_Inclusion_Hardened_Legitimate_Access.png
+SS_H13_File_Inclusion_Hardened_Traversal_Rejected.png
+
+5. LIMITATIONS
+Remote File Inclusion was not tested because the lab's PHP version
+is 8.5.11 and remote inclusion support is deprecated/limited.
+The remediation report applies to the tested Impossible-level
+File Inclusion handler and does not claim that every PHP file
+in the application has been independently audited.

@@ -1,0 +1,20 @@
+CSP BYPASS — REMEDIATION NOTES
+Student ID: 28212
+Environment: Separate hardened DVWA container
+Security level: Impossible
+
+Changes implemented:
+1. Replaced the CSP response policy with default-src 'self', script-src 'self', object-src 'none', base-uri 'self', frame-ancestors 'none', and form-action 'self'.
+2. Removed the user-controlled POST include value that was appended directly into the page HTML.
+3. Preserved the legitimate calculation form and local JavaScript file.
+4. Disabled JSONP callback execution. The endpoint now returns HTTP 400 with a JSON error response and nosniff protection.
+
+Validation:
+- Both modified PHP files passed syntax checks inside the hardened container.
+- The legitimate calculation displayed 15.
+- A request supplying callback=alert was rejected with HTTP 400 and JSON error.
+- Screenshots: SS_H25_CSP_Hardened_Legitimate_Calculation.png and SS_H26_CSP_Hardened_JSONP_Callback_Rejected.png.
+
+Limitations:
+- The hardened environment was tested at Impossible security level. This does not establish that the Low, Medium, and High implementations are secure.
+- The verification covered the calculation and JSONP callback rejection; it was not a comprehensive CSP browser-policy audit.

@@ -1,0 +1,151 @@
+AUCA LINUX ADMINISTRATION FINAL EXAMINATION
+QUESTION 1 - TASK 1
+FILE UPLOAD VULNERABILITY REMEDIATION REPORT
+
+Student ID: 28212
+Student: Juventus Kalema
+Environment: Hardened DVWA Docker Environment
+Target URL: http://127.0.0.1:4280/vulnerabilities/upload/
+Security Level: Impossible
+Date: 10 November 2026
+
+1. OBJECTIVE
+
+To strengthen the DVWA File Upload functionality against unrestricted
+file upload, malicious file extensions, MIME-type spoofing, invalid
+image content, and unsafe uploaded filenames.
+
+2. ORIGINAL WEAKNESSES IDENTIFIED
+
+The original Impossible-level implementation included several useful
+checks but had limitations:
+
+- Relied partly on the original filename extension.
+- Relied on the browser-provided MIME type.
+- Did not independently verify the uploaded file using PHP Fileinfo.
+- Did not enforce a strict image-dimension and pixel-count limit.
+- Used temporary image processing that required additional safeguards.
+- Used an image-destruction operation that produced a PHP 8.5
+  deprecation warning when the image was invalid.
+
+3. REMEDIATION IMPLEMENTED
+
+The hardened handler was implemented in:
+
+vulnerabilities/upload/source/impossible.php
+
+The replacement introduces:
+
+- POST upload handling and CSRF token validation.
+- Validation of the PHP upload error status.
+- Verification using is_uploaded_file().
+- Server-side file-size verification, with a 100,000-byte limit.
+- Strict JPEG and PNG extension allowlisting.
+- MIME detection using PHP Fileinfo.
+- Independent image-structure validation using getimagesize().
+- Image dimension and total pixel-count restrictions.
+- JPEG/PNG format consistency checks.
+- Image decoding using the appropriate GD decoder.
+- Random 16-byte filenames generated with random_bytes().
+- Re-encoding of accepted images using GD.
+- Temporary output creation within the destination directory.
+- File permission restriction to 0644.
+- Atomic rename into the upload directory.
+- HTML output encoding for the generated filename.
+- Generic user-facing rejection messages and server-side error logging.
+- Temporary-file cleanup after processing.
+
+The handler does not trust the original browser filename as the
+stored filename.
+
+4. FUNCTIONAL TESTS
+
+Test 1: Valid PNG image
+
+Input:
+valid-test-image.png
+
+Original image:
+190 x 20 pixels
+667 bytes
+PNG format
+
+Result:
+Accepted successfully.
+
+The server generated a random filename and saved the re-encoded
+image in the application's upload directory.
+
+Generated filename observed:
+b9a608672fd43336b438af94d2453d5d.png
+
+Test 2: Plain-text file disguised as PNG
+
+Input:
+fake-image.png
+
+Actual file type:
+ASCII text
+
+Result:
+Rejected by the hardened handler.
+
+The server did not store the rejected file.
+
+Test 3: Upload directory verification
+
+The upload directory was inspected after testing.
+
+Files observed:
+dvwa_email.png - 667 bytes
+b9a608672fd43336b438af94d2453d5d.png - 683 bytes
+a3924a6d1ec0e9ebd437c2c7be030548.png - 683 bytes
+
+No fake-image.png or temporary upload files were present.
+
+5. PHP COMPATIBILITY CORRECTION
+
+PHP 8.5 reported that finfo_close() is deprecated because Fileinfo
+objects are freed automatically.
+
+The deprecated call was removed from the hardened handler.
+
+The corrected handler was copied into the running hardened
+container and validated using PHP's syntax checker.
+
+Result:
+No syntax errors detected.
+
+The browser upload test was repeated successfully without PHP
+deprecation or header warnings.
+
+6. EVIDENCE
+
+Screenshots:
+
+SS_H14_File_Upload_Hardened_Valid_PNG_Accepted.png
+SS_H15_File_Upload_Hardened_Fake_PNG_Rejected.png
+
+Additional validation:
+- PHP syntax check passed.
+- Live container handler checked for the deprecated call.
+- Live file opening bytes verified.
+- Upload directory inspected after rejection.
+
+7. CONCLUSION
+
+The hardened File Upload handler successfully accepted a valid PNG
+image, re-encoded it, and stored it under a randomly generated
+filename.
+
+A plain-text file disguised with a PNG extension was rejected and
+was not stored.
+
+The implementation improves validation, filename safety, image
+processing, error handling, and PHP 8.5 compatibility.
+
+The tests confirm the intended upload and rejection behaviour in
+the local hardened DVWA environment. They do not constitute a
+complete production security certification.
+
+END OF REPORT

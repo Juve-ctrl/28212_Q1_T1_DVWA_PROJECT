@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mariadb:10
+    container_name: db-28212-hardened
+    restart: unless-stopped
+    env_file:
+      - .env.hardened
+    volumes:
+      - dvwa-28212-hardened-data:/var/lib/mysql
+    networks:
+      - hardened
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  dvwa:
+    build:
+      context: .
+      dockerfile: Dockerfile.hardened
+    image: dvwa-28212-hardened:local
+    container_name: dvwa-28212-hardened
+    restart: unless-stopped
+    environment:
+      DB_SERVER: db-28212-hardened
+      DB_DATABASE: db_28212_hardened
+      DB_USER: jkalema_hardened
+      DB_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
+      DEFAULT_SECURITY_LEVEL: impossible
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:4280:80"
+    networks:
+      hardened:
+        aliases:
+          - task1-28212-hardened.local
+
+networks:
+  hardened:
+    external: true
+    name: dvwa-28212-hardened-net
+
+volumes:
+  dvwa-28212-hardened-data:
+    external: true
+    name: dvwa-28212-hardened-data

@@ -1,0 +1,46 @@
+LINUX ADMINISTRATION — FINAL PROJECT
+QUESTION 1, TASK 1 — DVWA LAB BASELINE
+
+Date: 08 November 2026
+Student: Juventus Ndahiro Mathew
+Student ID: 28212
+
+DVWA SOURCE
+Repository: https://github.com/digininja/DVWA
+Commit: a1978a2fed195acd093010af6395f86a281537ca
+Commit date: 2026-10-18T18:11:33+01:00
+
+DVWA CONTAINER
+Name: dvwa-28212
+Image: ghcr.io/digininja/dvwa:latest
+Architecture: arm64
+Image ID: sha256:8029450682bd70e2e8cd1ffe8e46dd1885ff2a913296091cebfa8ba0a7d36498
+
+DATABASE CONTAINER
+Name: db-28212
+Image: mariadb:10
+Architecture: arm64
+Image ID: sha256:d769e37960821dfdcf096954f6e7ac89f747e116c1bba98e48edd265dfc7deae
+Database: db_28212
+
+NETWORK
+Name: dvwa-28212-net
+Driver: bridge
+Subnet: 172.19.0.0/16
+DVWA IP: 172.19.0.2
+Kali IP: 172.19.0.4
+
+ACCESS
+Assignment URL: http://task1.28212.linux-f26/
+Mac host binding: 127.0.0.1:80
+Initial DVWA security level: Low
+
+DATABASE BACKUP
+File: db_28212_baseline_20261108.sql
+Location: 02_VULNERABLE_BASELINE/
+
+CONNECTIVITY
+Kali-to-DVWA TCP connection on port 80: SUCCESSFUL
+Hostname resolution: VERIFIED
+
+SHA-256 (db_28212_baseline_20261108.sql): 04e25a728a1fba7692c2ed01b6b11919d3c6dfab2ef0bae702b8752b3331d0a5

@@ -1,0 +1,27 @@
+AUCA LINUX ADMINISTRATION — QUESTION 1, TASK 1
+Student ID: 28212
+Category: DOM-Based Cross-Site Scripting (XSS)
+
+1. IMPLEMENTATION
+The hardened DOM XSS page was modified to eliminate unsafe document.write() operations using URL-controlled input.
+URLSearchParams reads the default parameter.
+DOM elements are created using createElement().
+User-controlled values are assigned using textContent rather than interpreted as HTML.
+The original language options remain available.
+
+2. DEPLOYMENT
+The modified index.php was deployed to dvwa-28212-hardened.
+The live PHP file passed syntax validation.
+
+3. VERIFICATION
+Legitimate language selection using French worked.
+The harmless test payload:
+<img src=x onerror=alert(28212)>
+was displayed as literal text.
+No JavaScript alert executed.
+
+4. EVIDENCE
+SS_H22_DOM_XSS_Hardened_Payload_Displayed_Safely.png
+
+5. CONCLUSION
+The tested DOM XSS payload was rendered as text rather than executable HTML. Normal language selection remained functional.

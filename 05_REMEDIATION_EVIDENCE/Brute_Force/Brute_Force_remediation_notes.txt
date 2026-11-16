@@ -1,0 +1,58 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+QUESTION 1 - TASK 1
+
+BRUTE FORCE REMEDIATION REPORT
+
+Student ID: 28212
+Application: Damn Vulnerable Web Application (DVWA)
+Hardened application: http://127.0.0.1:4280/
+Category: Brute Force
+
+1. IMPLEMENTED REMEDIATION
+
+The hardened Brute Force implementation uses a separate brute_force_attempts
+tracking table. The recorded table includes hashed username/IP identity data,
+attempt counts, a tracking window, lock expiry and last-attempt information,
+with a unique identity key.
+
+The lockout implementation was changed so that the lock period is not extended
+by repeated requests made while the account is already locked.
+
+2. VERIFICATION
+
+- PHP syntax validation passed for the updated remediation file.
+- The brute_force_attempts tracking table and its fields were verified.
+- The fifth failed attempt triggered a 15-minute lockout.
+- Correct credentials were rejected during the active lockout.
+- Further blocked requests did not extend the lockout period.
+- After clearing the tracking record, a successful login was obtained.
+- The successful login displayed the protected-area welcome message.
+
+Confirmed screenshot:
+SS_H06_Brute_Force_Successful_Login.png
+
+3. LIMITATIONS AND REMAINING SECURITY CONSIDERATIONS
+
+The recorded implementation still used MD5 password hashes. MD5 is not an
+appropriate password-storage algorithm for production systems. Password
+storage should be migrated to a modern adaptive password-hashing function.
+
+The rate limiter uses username/IP-based identity information. In the Docker
+lab, requests can appear to originate from the Docker gateway address, so
+multiple clients may share the same observed source IP.
+
+The original baseline assessment used only a small number of controlled
+manual attempts and did not perform high-volume password guessing.
+
+4. CONCLUSION
+
+The hardened implementation demonstrated a five-failure threshold and a
+15-minute lockout. Correct credentials were rejected during the lockout,
+blocked requests did not extend the lockout, and successful login was
+verified after the tracking record was cleared.
+
+The remaining MD5 password-storage weakness must be distinguished from the
+verified brute-force lockout remediation. This report does not claim that
+the entire authentication system is production-ready.
+
+End of report.

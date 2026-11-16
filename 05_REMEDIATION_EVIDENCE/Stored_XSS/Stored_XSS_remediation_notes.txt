@@ -1,0 +1,28 @@
+QUESTION 1 - TASK 1
+STORED CROSS-SITE SCRIPTING (XSS) REMEDIATION
+Student ID: 28212
+Environment: Separate hardened DVWA Docker environment
+Security level: Impossible
+
+IMPLEMENTATION
+- Preserved CSRF token validation for guestbook submissions.
+- Validated that name and message inputs are strings, non-empty, and within the form's length limits.
+- Stored plain text using PDO prepared statements and bound parameters.
+- Removed HTML encoding before database storage to prevent double encoding.
+- Strengthened guestbook output encoding using htmlspecialchars with ENT_QUOTES, ENT_SUBSTITUTE, and UTF-8.
+- Preserved the existing guestbook display and clear functionality.
+- Deployed both modified PHP files to dvwa-28212-hardened.
+
+VALIDATION
+- Both modified PHP files passed syntax checks inside the hardened container.
+- A normal guestbook entry was submitted and displayed.
+- Harmless payload tested: <img src=x onerror=alert(28212)>
+- The payload was displayed as text and did not execute.
+- Screenshot: SS_H24_Stored_XSS_Hardened_Payload_Displayed_Safely.png
+
+LIMITATIONS
+- Testing was performed in the isolated DVWA lab.
+- The result verifies the tested guestbook path, not every possible XSS path in the application.
+
+CONCLUSION
+The hardened guestbook uses server-side input validation, PDO prepared statements, CSRF protection, and output encoding. The normal entry remained functional and the tested stored XSS payload did not execute.

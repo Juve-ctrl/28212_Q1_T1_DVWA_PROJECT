@@ -1,0 +1,61 @@
+# macOS and editor files
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Private DVWA configuration
+**/config/config.inc.php
+**/config/config.inc.php.bak
+
+# Database dumps and local databases
+*.sql
+*.sql.gz
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# Dependencies and generated files
+**/vendor/
+**/node_modules/
+**/.pytest_cache/
+
+# Nested repository metadata
+**/.git/
+
+# Hardened environment secrets and deployment files
+03_HARDENED_ENVIRONMENT/DVWA/.env*
+03_HARDENED_ENVIRONMENT/DVWA/compose*.yml
+03_HARDENED_ENVIRONMENT/DVWA/config/config.inc.php*
+
+# Private environment and rollback files
+*.env
+.*.env
+*rollback*.json
+.*rollback*.json
+
+# Credential testing files
+**/test_credentials.php
+
+# Exclude upstream Compose file containing hard-coded database credentials
+/02_VULNERABLE_BASELINE/DVWA_SOURCE_EXPORT/compose.yml
+
+# Exclude local Compose backup containing a literal database password
+/03_HARDENED_ENVIRONMENT/DVWA/compose.28212.yml.pre-hostname-backup

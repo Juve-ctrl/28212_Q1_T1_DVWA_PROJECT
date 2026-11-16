@@ -1,0 +1,49 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+Question 1 - Task 1
+Student ID: 28212
+
+VULNERABILITY: INSECURE CAPTCHA
+ENVIRONMENT: Hardened DVWA
+SECURITY LEVEL: Impossible
+DATE: 10 November 2026
+
+1. ORIGINAL FINDING
+The CAPTCHA configuration did not contain valid Google reCAPTCHA public and private keys. Live provider verification was therefore unavailable.
+
+2. REMEDIATION IMPLEMENTED
+The CAPTCHA verification library was updated to:
+- Reject empty keys and empty CAPTCHA responses.
+- Send verification requests using HTTP POST.
+- Apply a request timeout.
+- Verify TLS peer certificates and hostnames.
+- Require a valid JSON response with success exactly true.
+- Fail closed when verification fails or the provider is unavailable.
+- Log verification exceptions.
+- HTML-escape the public site key.
+
+The Impossible-level password-change handler was updated to:
+- Validate the CSRF token.
+- Reject password changes when either provider key is missing.
+- Reject empty or unsuccessful CAPTCHA responses.
+- Verify the current password.
+- Use prepared PDO statements.
+- Require matching new-password and confirmation values.
+- Retain MD5 only for compatibility with the DVWA lab database schema. This is not suitable for production authentication.
+
+3. VERIFICATION
+- PHP syntax checks passed for both updated files in the live container.
+- The deployed handler contains the missing-key rejection branch.
+- Direct execution of the deployed handler with missing keys returned:
+  "CAPTCHA verification is unavailable. Password change rejected."
+- The verification library returned false for empty credentials.
+- Database verification confirmed the original student account password remained unchanged.
+- No successful password change was performed during the rejection test.
+
+4. EVIDENCE
+SS_H16_CAPTCHA_Hardened_Missing_Keys_Rejected.png
+
+5. LIMITATIONS
+Live Google reCAPTCHA verification was not possible because valid provider keys were unavailable. Successful CAPTCHA completion and live provider outage behaviour were not end-to-end tested. The implementation's local fail-closed behaviour was verified; live provider integration remains pending.
+
+6. CONCLUSION
+The hardened implementation rejects password changes when CAPTCHA verification is unavailable or unsuccessful. Local fail-closed behaviour and preservation of the original student password were verified.

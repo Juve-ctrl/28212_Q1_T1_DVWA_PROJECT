@@ -1,0 +1,175 @@
+# CSRF REMEDIATION REPORT
+## AUCA Linux Administration – Final Examination
+### Question 1, Task 1 – DVWA Security Hardening
+
+**Student ID:** 28212  
+**Application:** Damn Vulnerable Web Application (DVWA)  
+**Environment:** Hardened Docker-based DVWA  
+**Application URL:** http://127.0.0.1:4280  
+**Container:** dvwa-28212-hardened  
+**Security Level:** Impossible  
+**Date:** 10 November 2026
+
+---
+
+## 1. Objective
+
+The objective was to strengthen the Cross-Site Request Forgery (CSRF) password-change functionality in the isolated hardened DVWA environment.
+
+The remediation focused on preventing unauthorised password changes through forged requests, enforcing server-side token validation, verifying the current password and using prepared database statements.
+
+The vulnerable baseline environment was preserved separately.
+
+## 2. Original Vulnerabilities Identified
+
+Inspection of the original CSRF implementation identified the following weaknesses:
+
+- Low security level accepted password-change requests through HTTP GET without CSRF token validation.
+- Medium security level relied on the HTTP Referer header, which is not a reliable CSRF defence.
+- High security level implemented token validation but retained weaknesses in its request handling.
+- The original Impossible implementation used a shared DVWA token mechanism and accepted GET requests.
+- The shared DVWA token generator used `md5(uniqid())`, which is not a cryptographically secure token-generation method.
+
+## 3. Remediation Implemented
+
+The hardened implementation modified:
+
+1. `vulnerabilities/csrf/index.php`
+2. `vulnerabilities/csrf/source/impossible.php`
+
+### 3.1 POST-only request handling
+
+The Impossible-level password-change form was changed from HTTP GET to HTTP POST.
+
+The handler accepts password-change requests only when the request method is POST and the Change parameter is present.
+
+### 3.2 Cryptographically secure CSRF token
+
+A dedicated session-bound CSRF token is generated using:
+
+`bin2hex(random_bytes(32))`
+
+This produces a 64-character hexadecimal token derived from 32 cryptographically secure random bytes.
+
+The token is included as a hidden form field named `csrf_token`.
+
+### 3.3 Constant-time token comparison
+
+The submitted token is checked using PHP's `hash_equals()` function.
+
+Missing, empty or invalid tokens cause the request to be rejected with HTTP status 403.
+
+### 3.4 Password verification
+
+The handler requires:
+
+- The current password.
+- A new password.
+- Confirmation of the new password.
+- Matching new-password and confirmation values.
+
+The current password is verified against the authenticated user's stored password hash before an update is allowed.
+
+### 3.5 Prepared database statements
+
+PDO prepared statements are used for the password lookup and update operations.
+
+This avoids constructing SQL statements by concatenating submitted user input.
+
+### 3.6 Error handling and token rotation
+
+Database exceptions are logged server-side without exposing sensitive database details to the browser.
+
+The dedicated CSRF token is rotated after every POST attempt.
+
+### 3.7 Output handling
+
+The handler was corrected to avoid output before PHP sends HTTP headers. The leading newline and trailing PHP closing tag were removed.
+
+The updated handler passed PHP syntax validation and the browser subsequently loaded the page without header warnings.
+
+## 4. Verification and Testing
+
+Testing was conducted against the hardened DVWA container.
+
+| Test | Expected result | Actual result |
+|---|---|---|
+| PHP syntax validation of CSRF page | No syntax errors | Passed |
+| PHP syntax validation of Impossible handler | No syntax errors | Passed |
+| Normal password-change request using valid token | Password Changed | Passed |
+| Invalid CSRF token | HTTP 403 rejection | Passed |
+| Password integrity after rejected request | Original password remains valid | Passed |
+| Header warning check | No premature-output warnings | Passed |
+
+### 4.1 Legitimate request test
+
+A legitimate POST request was submitted using the authenticated student account.
+
+The current password, new password and confirmation were all set to the existing laboratory password.
+
+The application returned:
+
+`Password Changed.`
+
+The same password was used intentionally to verify the legitimate password-change process without changing the account credentials.
+
+### 4.2 Invalid token test
+
+The hidden `csrf_token` field was deliberately modified through browser Developer Tools to contain:
+
+`invalid-token-28212`
+
+The form was submitted with a different proposed new password.
+
+The application returned:
+
+`Request rejected: invalid security token.`
+
+The request was rejected.
+
+### 4.3 Independent database verification
+
+The hardened MariaDB database was queried to verify that the original password remained valid.
+
+Query:
+
+`SELECT user, password = MD5('28212@linux-f26') AS original_password_still_valid, LENGTH(password) AS hash_length FROM users WHERE user = '28212';`
+
+Observed result:
+
+- Account: `28212`
+- `original_password_still_valid`: `1`
+- `hash_length`: `32`
+
+This independently confirmed that the invalid CSRF request did not change the stored password.
+
+## 5. Evidence Screenshots
+
+The following screenshots were captured during the tests:
+
+| Screenshot filename | Evidence |
+|---|---|
+| `SS_H10_CSRF_Hardened_Valid_Post_Success.png` | Successful legitimate POST password-change request |
+| `SS_H11_CSRF_Hardened_Invalid_Token_Rejected.png` | Rejection of a deliberately invalid CSRF token |
+
+Evidence directory:
+
+`06_SCREENSHOTS_AND_LOGS/`
+
+## 6. Remaining Limitations
+
+The DVWA database schema stores passwords in a 32-character field using MD5 hashes. The hardened handler retains MD5 compatibility because changing the shared authentication system and database schema could affect other DVWA modules.
+
+MD5 is not suitable for production password storage. A production application should use PHP `password_hash()` with Argon2id or an appropriate bcrypt configuration, and verify passwords using `password_verify()`.
+
+The remediation is scoped to the Impossible-level CSRF password-change implementation. The original Low, Medium and High demonstration levels remain available for comparison.
+
+## 7. Conclusion
+
+The CSRF remediation was implemented and tested successfully in the separate hardened DVWA environment.
+
+The Impossible-level password-change handler now requires POST requests, a dedicated cryptographically secure session-bound token, current-password verification and PDO prepared statements.
+
+Both legitimate and malicious-token test cases were executed. The legitimate request succeeded, while the invalid-token request was rejected with HTTP 403. Independent database verification confirmed that the original password remained unchanged after rejection.
+
+**Final status:** CSRF remediation implementation and initial verification completed.

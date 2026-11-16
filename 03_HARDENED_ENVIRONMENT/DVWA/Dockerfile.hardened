@@ -1,0 +1,7 @@
+FROM ghcr.io/digininja/dvwa:latest
+
+WORKDIR /var/www/html
+
+COPY --chown=www-data:www-data . /var/www/html/
+
+RUN php -l /var/www/html/config/config.inc.php

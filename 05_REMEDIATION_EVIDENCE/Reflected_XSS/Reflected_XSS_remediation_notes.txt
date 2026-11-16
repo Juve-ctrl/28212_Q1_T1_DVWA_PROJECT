@@ -1,0 +1,25 @@
+QUESTION 1 - TASK 1
+REFLECTED CROSS-SITE SCRIPTING (XSS) REMEDIATION
+Student ID: 28212
+Environment: Separate hardened DVWA Docker environment
+Security level: Impossible
+
+IMPLEMENTATION
+- Preserved the original DVWA anti-CSRF token validation.
+- Rejected non-string input and input exceeding 100 characters.
+- Encoded reflected input with htmlspecialchars using ENT_QUOTES and ENT_SUBSTITUTE with UTF-8.
+- Preserved session-token generation.
+- Deployed the corrected handler to dvwa-28212-hardened.
+
+VALIDATION
+- PHP syntax validation in the hardened container passed.
+- Browser payload test used: <script>alert(28212)</script>
+- The payload was displayed as text rather than executed.
+- Screenshot: SS_H23_Reflected_XSS_Hardened_Payload_Rejected.png
+
+LIMITATIONS
+- Verification was performed in the isolated DVWA lab, not a production application.
+- The test demonstrates safe handling of the tested reflected payload; it is not proof that every possible XSS path in the application has been eliminated.
+
+CONCLUSION
+The Impossible-level Reflected XSS handler was strengthened with input validation, context-appropriate HTML encoding, and preserved CSRF validation. The deployed PHP file passed syntax validation and the tested payload did not execute.

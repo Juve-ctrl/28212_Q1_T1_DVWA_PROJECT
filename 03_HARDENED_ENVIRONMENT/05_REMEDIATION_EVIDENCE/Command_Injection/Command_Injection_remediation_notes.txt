@@ -1,0 +1,44 @@
+QUESTION 1 - TASK 1
+COMMAND INJECTION REMEDIATION REPORT
+
+Environment:
+Hardened DVWA
+URL: http://127.0.0.1:4280
+Security level: Impossible
+
+Original weaknesses:
+- User input was concatenated into a shell command.
+- Validation did not strictly enforce IPv4 address ranges.
+- shell_exec() was used.
+- Command output was not HTML-escaped.
+
+Remediation:
+- Retained the DVWA CSRF token check.
+- Validated input using FILTER_VALIDATE_IP with FILTER_FLAG_IPV4.
+- Replaced shell command concatenation with proc_open().
+- Used a fixed executable path: /usr/bin/ping.
+- Passed command arguments as a separate array.
+- Enabled bypass_shell to prevent shell interpretation.
+- Escaped displayed output using htmlspecialchars().
+- Logged command failures without displaying raw error details.
+
+Verification:
+1. Normal IPv4 ping to 127.0.0.1 succeeded.
+2. Payload 127.0.0.1; id was rejected.
+3. Invalid address 999.999.999.999 was rejected.
+4. PHP syntax check passed.
+5. Installed source inspection confirmed proc_open() and no shell_exec() call.
+
+Evidence:
+SS_H07_Command_Injection_Hardened_Normal_Ping.png
+SS_H08_Command_Injection_Hardened_Injection_Rejected.png
+SS_H09_Command_Injection_Hardened_Invalid_IP_Rejected.png
+
+Limitations:
+- This remediation addresses the tested Command Injection path.
+- The broader DVWA application still requires independent security review.
+- The ping executable and proc_open availability are environment dependencies.
+
+Conclusion:
+The tested Command Injection payloads were rejected while legitimate
+IPv4 ping functionality remained operational.

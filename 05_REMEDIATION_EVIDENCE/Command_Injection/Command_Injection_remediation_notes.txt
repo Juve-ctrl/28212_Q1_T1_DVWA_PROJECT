@@ -1,0 +1,50 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+QUESTION 1 - TASK 1
+
+COMMAND INJECTION REMEDIATION REPORT
+
+Student ID: 28212
+Application: Damn Vulnerable Web Application (DVWA)
+Hardened application: http://127.0.0.1:4280/
+Category: Command Injection
+
+1. BASELINE FINDING
+
+At Low security, the controlled input 127.0.0.1; id executed an
+additional operating-system command and returned the www-data identity.
+
+Medium and High used blacklist filtering. Impossible performed IP-format
+validation but still used shell execution. These approaches did not
+eliminate the underlying risk of shell command construction.
+
+2. IMPLEMENTED REMEDIATION
+
+The hardened API health-connectivity endpoint was changed to validate
+the target as an IP address before execution.
+
+The ping process is invoked using proc_open() with an argument array
+and shell bypass. User input is not interpolated into a shell command.
+
+3. VERIFICATION
+
+- A normal connectivity request using 127.0.0.1 was supported.
+- A malicious target containing 127.0.0.1; id was rejected.
+- The malicious request returned HTTP 400 with Invalid target.
+- The endpoint was tested at POST /vulnerabilities/api/v2/health/connectivity.
+
+Evidence:
+The hardened API security evidence and test results are recorded in the
+API Security remediation report. Do not treat baseline screenshots SS26–SS32
+as hardened-remediation evidence.
+
+4. CONCLUSION AND LIMITATIONS
+
+The hardened connectivity endpoint rejects the tested command-injection
+input and avoids shell-string interpolation by using an argument array
+with shell bypass.
+
+The verification applies to the documented hardened API endpoint and
+tested inputs. It does not establish that every command-execution path
+in the entire DVWA application has been independently audited.
+
+End of report.

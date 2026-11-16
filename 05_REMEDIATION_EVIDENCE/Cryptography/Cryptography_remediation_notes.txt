@@ -1,0 +1,32 @@
+STUDENT ID: 28212
+TASK: Linux Administration Final Examination - Question 1, Task 1
+CATEGORY 18: CRYPTOGRAPHY
+ENVIRONMENT: Hardened DVWA container (dvwa-28212-hardened)
+
+REMEDIATION
+- Replaced the hardcoded cryptographic key with a protected environment variable, DVWA_CRYPTO_KEY.
+- Configured a 32-byte (256-bit) key, stored in the local .env.hardened file with restrictive file permissions.
+- Retained AES-256-GCM authenticated encryption.
+- Generated a fresh random 12-byte IV for each token.
+- Used a 16-byte authentication tag to detect ciphertext modification.
+- Added strict token JSON, Base64, field, and input-size validation.
+- Restricted the verification endpoint to POST requests with JSON content.
+- Added generic authentication failure responses and server-side error logging.
+- Kept the cryptographic key out of the application source and Docker build context.
+
+VERIFICATION
+1. Confirmed the running container receives a valid 32-byte hexadecimal encryption key without displaying the secret.
+2. Submitted an unmodified token. The application accepted it and identified Bungle as a normal user.
+3. Changed one character in the token's Base64 value while retaining the IV. The application rejected it with:
+   "Error: Invalid or unauthenticated token."
+
+EVIDENCE
+- SS_H33_Cryptography_Hardened_Valid_Token_Accepted.png
+- SS_H34_Cryptography_Hardened_Tampered_Token_Rejected.png
+
+LIMITATIONS
+- The key is protected through the local environment file; production deployment would require a managed secret store, documented key rotation, and secure backup/recovery procedures.
+- This is a hardened DVWA demonstration, not a production cryptographic service.
+
+CONCLUSION
+The hardened implementation uses authenticated AES-256-GCM encryption and rejects a modified token. Both the valid-token and tampered-token checks passed.

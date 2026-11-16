@@ -1,0 +1,56 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+QUESTION 1 - TASK 1
+
+CROSS-SITE REQUEST FORGERY (CSRF) REMEDIATION REPORT
+
+Student ID: 28212
+Application: Damn Vulnerable Web Application (DVWA)
+Hardened application: http://127.0.0.1:4280/
+Category: CSRF
+
+1. BASELINE FINDINGS
+
+The Low and Medium password-change forms used GET requests without
+a visible CSRF token. High and Impossible included token validation,
+but the baseline Impossible implementation still used GET parameters.
+The baseline token generator used md5(uniqid()), which is not
+cryptographically secure.
+
+2. IMPLEMENTED REMEDIATION
+
+The hardened password-change workflow was updated to:
+- Accept state-changing password requests through POST.
+- Generate a 256-bit CSRF token using a cryptographically secure
+  random generator.
+- Validate the submitted token using hash_equals().
+- Verify the current password before changing it.
+- Use PDO prepared statements for the database operation.
+- Reject invalid CSRF requests with HTTP 403.
+
+3. VERIFICATION
+
+- A request with an invalid CSRF token was rejected.
+- The invalid-token test did not change the account password.
+- The original lab password remained valid after the negative test.
+- The hardened implementation uses POST rather than GET for the
+  password-change operation.
+
+4. REMAINING SECURITY CONSIDERATION
+
+The DVWA lab account password storage still uses the application's
+MD5-based password hash. MD5 is unsuitable for production password
+storage and requires a separate migration to a modern adaptive
+password-hashing algorithm.
+
+5. CONCLUSION
+
+The hardened CSRF workflow adds POST-only state changes, a
+cryptographically random token, secure token comparison, current
+password verification and prepared database statements. The invalid
+token test confirmed rejection without changing the account password.
+
+This report documents the tested hardened password-change workflow;
+it does not claim that every state-changing endpoint in the application
+has been independently audited.
+
+End of report.

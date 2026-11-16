@@ -1,0 +1,65 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+QUESTION 1 - TASK 1
+
+FILE UPLOAD REMEDIATION REPORT
+
+Student ID: 28212
+Application: Damn Vulnerable Web Application (DVWA)
+Hardened application: http://127.0.0.1:4280/
+Category: File Upload
+
+1. BASELINE FINDINGS
+
+The baseline assessment showed that Low accepted uploads without
+meaningful content validation. Medium relied partly on client-supplied
+MIME information and file size. High added extension and image checks.
+Impossible added CSRF validation, image processing and random filenames.
+
+The original test-upload.png fixture was malformed and was not treated
+as a valid image.
+
+2. IMPLEMENTED REMEDIATION
+
+The hardened upload implementation applies multiple controls:
+- Validates the upload operation and uploaded-file status.
+- Enforces a 100,000-byte file-size limit.
+- Allows only JPEG and PNG formats.
+- Checks actual MIME information using Fileinfo.
+- Validates image content and dimensions.
+- Decodes and re-encodes the image using GD.
+- Generates an unpredictable filename using random_bytes().
+- Uses a temporary file and atomic rename for storage.
+- Applies restrictive file permissions.
+- Escapes output and handles failed uploads without exposing internal
+  diagnostic details to the user.
+
+3. VERIFICATION
+
+- A corrected valid 2 x 2 PNG image was accepted.
+- The uploaded image was assigned a random server-generated filename.
+- A text file disguised with a .png extension was rejected.
+- The rejected fake image was not stored as an accepted upload.
+- PHP syntax validation passed after removal of the deprecated
+  finfo_close() call.
+
+Confirmed hardened screenshots:
+- SS_H14_File_Upload_Hardened_Valid_PNG_Accepted.png
+- SS_H15_File_Upload_Hardened_Fake_PNG_Rejected.png
+
+4. COMPATIBILITY AND LIMITATIONS
+
+The baseline malformed image caused image-decoding errors. This was
+a test-fixture problem and not evidence that a valid PNG was rejected.
+
+The hardened implementation was adjusted to avoid the deprecated
+finfo_close() call. This report does not claim that every possible
+image format or malicious image payload has been tested.
+
+5. CONCLUSION
+
+The hardened upload workflow combines file-size and format restrictions,
+server-side content inspection, image re-encoding, unpredictable
+filenames and controlled storage. The valid-image acceptance and
+disguised-text rejection tests demonstrate the intended controls.
+
+End of report.

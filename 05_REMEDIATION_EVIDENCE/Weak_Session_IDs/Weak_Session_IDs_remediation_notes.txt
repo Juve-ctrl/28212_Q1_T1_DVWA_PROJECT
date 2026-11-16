@@ -1,0 +1,32 @@
+AUCA LINUX ADMINISTRATION — QUESTION 1, TASK 1
+Student ID: 28212
+Category: Weak Session IDs
+Environment: Separate hardened DVWA Docker environment
+
+1. IMPLEMENTATION
+The Impossible-level handler was hardened to generate a 20-byte cryptographically secure random value using random_bytes(20), encoded as hexadecimal (160 bits).
+The cookie is configured with:
+- Secure
+- HttpOnly
+- SameSite=Strict
+- A one-hour expiry
+- A restricted vulnerability-specific path
+The handler does not trust the HTTP Host header to configure the cookie domain.
+Generation errors are logged server-side and a generic message is returned.
+
+2. HTTP FAIL-CLOSED VERIFICATION
+The updated handler was deployed to dvwa-28212-hardened.
+The live PHP file passed PHP syntax validation.
+A browser test over HTTP returned:
+"Secure session cookie requires HTTPS."
+The handler therefore refused to issue the cookie over an insecure HTTP connection.
+
+3. EVIDENCE
+SS_H21_Weak_Session_IDs_Hardened_HTTP_Rejected.png
+
+4. LIMITATIONS
+Successful cookie storage and transmission over HTTPS were not tested because the hardened test site was accessed over HTTP.
+This verification does not establish production-wide session security.
+
+5. CONCLUSION
+The handler uses a cryptographically secure random identifier and restrictive cookie attributes. It fails closed when HTTPS is unavailable, preventing issuance of a session cookie over the tested HTTP connection.

@@ -1,0 +1,25 @@
+BROKEN ACCESS CONTROL — REMEDIATION NOTES
+Student ID: 28212
+Environment: Hardened DVWA
+Security level: Impossible
+
+Changes:
+1. The authenticated username is obtained from the server-side DVWA session.
+2. The user's ID and role are retrieved from the database using a prepared statement.
+3. The session user ID is initialised from the authenticated database identity.
+4. Ordinary users may access only their own profile.
+5. Administrator access to other profiles is permitted by the role check.
+6. Requested IDs are validated, and profile queries use prepared statements.
+7. Profile fields are HTML-encoded before display.
+
+Verification:
+- PHP syntax validation passed on the Mac and inside the hardened container.
+- Student account 28212 successfully accessed its own profile (user ID 6).
+- Student account 28212 was denied access to another profile (user ID 1).
+
+Evidence:
+SS_H29_Broken_Access_Control_Hardened_Own_Profile_Allowed.png
+SS_H30_Broken_Access_Control_Hardened_Other_Profile_Denied.png
+
+Limitation:
+Administrator access to another user's profile has not yet been independently tested.

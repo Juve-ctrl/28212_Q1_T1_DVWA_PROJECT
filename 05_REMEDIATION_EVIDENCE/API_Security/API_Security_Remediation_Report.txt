@@ -1,0 +1,111 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+
+QUESTION 1 - TASK 1
+
+API SECURITY REMEDIATION REPORT
+
+Student ID: 28212
+
+Target application: Damn Vulnerable Web Application (DVWA)
+
+Hardened application URL: http://127.0.0.1:4280/
+
+API Playground: /vulnerabilities/api/
+
+Assessment category: API Security
+
+1. REMEDIATION SUMMARY
+
+The API Security category was addressed in the separate hardened DVWA environment. The changes focused on protecting user data, restricting user updates, preventing command injection, protecting token-signing secrets, externalising OAuth client credentials, and enforcing Bearer-token authentication for order requests.
+
+2. IMPLEMENTED PROTECTIONS
+
+A. User data exposure
+
+The user API serialization was modified to return only the permitted user fields: id, name, and level. Password hashes are excluded from API responses.
+
+B. Mass assignment
+
+User creation and update input validation was restricted. User updates accept the name field only, with validation for its type, non-empty value, and maximum length. Attempts to submit an unauthorized level change are rejected.
+
+C. Command injection
+
+The health connectivity endpoint validates its target before executing a ping operation. The ping process is invoked using an argument array with shell bypass rather than interpolating user input into a shell command.
+
+D. Token-signing secrets
+
+Hardcoded token-signing secret constants in Login.php were replaced with environment-based secret retrieval. The application validates that the configured secrets are 64 hexadecimal characters. The hardened environment file is permission-restricted.
+
+E. Bearer-token authentication
+
+The order API checks the access token supplied in the HTTP Authorization Bearer header before processing the protected order request.
+
+F. OAuth client credentials
+
+The demonstration client ID and client secret were removed from the login controller's hardcoded authentication comparison. The controller now reads the expected credentials from DVWA_API_CLIENT_ID and DVWA_API_CLIENT_SECRET environment variables. The hardened Compose configuration requires both variables, and the credentials are stored in the permission-restricted hardened environment file. The comparison uses hash_equals.
+
+3. VERIFICATION RESULTS
+
+Test 1: User API password-hash exposure
+
+Result: User API request completed and evidence screenshot was captured.
+
+Evidence: SS_H35_API_Security_Password_Hashes_Not_Exposed.png
+
+Test 2: Mass assignment
+
+Request: PUT /vulnerabilities/api/v2/user/2
+
+Test input included a name and an unauthorized level field.
+
+Observed response: HTTP 422 - Invalid input.
+
+Result: Unauthorized field rejected.
+
+Test 3: Command injection
+
+Request: POST /vulnerabilities/api/v2/health/connectivity
+
+Test target: 127.0.0.1; id
+
+Observed response: HTTP 400 - Invalid target.
+
+Result: Malicious target rejected.
+
+Test 4: OAuth login using environment-based client credentials
+
+Request: POST /vulnerabilities/api/v2/login/login
+
+Authentication: HTTP Basic client authentication with form-encoded password-grant credentials.
+
+Observed response: HTTP 200.
+
+Response fields: access_token, refresh_token, token_type, expires_in.
+
+Result: Token issuance successful using the newly configured environment-based client credentials. Tokens and secrets were not printed in the verification output.
+
+Test 5: Protected order API
+
+Request: GET /vulnerabilities/api/v2/order/
+
+Authentication: Bearer access token issued by the OAuth login request.
+
+Observed response: HTTP 200.
+
+Response type: JSON list.
+
+Number of returned records: 3.
+
+Result: Valid Bearer token accepted by the protected endpoint.
+
+4. SECURITY CONFIGURATION NOTES
+
+The OAuth client ID, OAuth client secret, access-token signing secret, and refresh-token signing secret are supplied through the hardened environment configuration rather than hardcoded authentication comparisons or token-signing constants. The environment file is permission-restricted. Secrets must remain confidential and should be rotated according to an appropriate operational policy.
+
+5. CONCLUSION
+
+The documented API protections have been implemented. The OAuth login and protected order endpoint were successfully verified using the new environment-based client credentials. The recorded negative tests rejected the mass-assignment and command-injection attempts.
+
+This report records the implemented changes and observed tests. It does not, by itself, establish that every API route or the entire application is production-ready. Final submission evidence review and any remaining required checks must still be completed.
+
+End of report.

@@ -1,0 +1,19 @@
+**/.git
+**/.gitignore
+**/.github
+**/Dockerfile*
+**/.dockerignore
+**/compose.yml
+
+# Hardened lab secrets and local environment files
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Preserve dependencies already installed in the base image
+**/vendor
+
+# Exclude editor temporary files and database backups
+**/*.swp
+**/*.sql

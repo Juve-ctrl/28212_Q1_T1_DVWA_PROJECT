@@ -1,0 +1,53 @@
+AUCA LINUX ADMINISTRATION FINAL EXAM
+QUESTION 1 - TASK 1
+
+FILE INCLUSION REMEDIATION REPORT
+
+Student ID: 28212
+Application: Damn Vulnerable Web Application (DVWA)
+Hardened application: http://127.0.0.1:4280/
+Category: File Inclusion
+
+1. BASELINE FINDING
+
+At Low security, a controlled directory traversal request using
+../../../../../etc/hostname successfully displayed the target hostname.
+This confirmed Local File Inclusion.
+
+Medium relied on string filtering. High used filename-pattern restrictions.
+Impossible used an explicit filename allowlist.
+
+2. IMPLEMENTED REMEDIATION
+
+The hardened File Inclusion implementation:
+- Accepts only scalar page input.
+- Rejects path separators and null bytes.
+- Uses an explicit allowlist of permitted filenames:
+  include.php, file1.php, file2.php and file3.php.
+- Resolves the selected file using realpath().
+- Verifies that the resolved file remains within the approved directory.
+- Checks that the file is readable before inclusion.
+- Returns controlled errors instead of exposing internal filesystem paths.
+
+The original workspace source was backed up before replacement.
+
+3. VERIFICATION
+
+The hardened implementation was tested using the normal permitted pages
+and a directory-traversal attempt. The traversal request was rejected
+rather than including the requested system file.
+
+4. LIMITATIONS
+
+Remote File Inclusion was not tested in the baseline because the installed
+PHP runtime does not support the required allow_url_include behaviour.
+No claim is made that RFI was successfully tested.
+
+5. CONCLUSION
+
+The hardened implementation replaces user-controlled file paths with
+a strict filename allowlist and verifies the resolved file location
+before inclusion. This addresses the Local File Inclusion weakness
+demonstrated in the baseline test.
+
+End of report.

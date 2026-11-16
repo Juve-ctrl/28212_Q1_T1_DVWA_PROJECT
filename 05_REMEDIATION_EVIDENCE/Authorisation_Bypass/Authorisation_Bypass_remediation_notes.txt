@@ -1,0 +1,25 @@
+AUTHORISATION BYPASS — REMEDIATION NOTES
+Student ID: 28212
+Environment: Hardened DVWA container
+Security level: Impossible
+
+Changes:
+1. The user-data endpoint now requires an authenticated administrator.
+2. The update endpoint now requires an authenticated administrator and POST.
+3. JSON request data is validated for structure, types, user ID and field lengths.
+4. User updates use a prepared MySQL statement.
+5. Both endpoints return JSON responses and do not expose database errors to clients.
+6. Access failures are logged without disclosing internal details.
+
+Verification:
+- Both PHP files passed syntax checks on the Mac and inside the hardened container.
+- Ordinary student account 28212 received HTTP 403 from get_user_data.php.
+- Ordinary student account 28212 received HTTP 403 from change_user_details.php.
+- No user records were intentionally modified during the hardened denial tests.
+
+Evidence:
+SS_H27_Authorisation_Bypass_Hardened_Data_Access_Denied.png
+SS_H28_Authorisation_Bypass_Hardened_Update_Denied.png
+
+Scope:
+Verification was performed as an ordinary authenticated user. Administrator success-path testing remains separate from these denial tests.
